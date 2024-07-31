@@ -1,0 +1,213 @@
+#include <REGX51.H>
+#define LCDPORT P2
+sbit _RS=P2^0;
+sbit _RW=P2^1;
+sbit _E=P2^2;
+#include "lcd.h"
+sbit keyrow1 = P3 ^ 0;
+sbit keyrow2 = P3 ^ 1;
+sbit keyrow3 = P3 ^ 2;
+sbit keyrow4 = P3 ^ 3;
+//keypad column
+sbit keycolumn1 = P1 ^ 3;
+sbit keycolumn2 = P1 ^ 2;
+sbit keycolumn3 = P1 ^ 1;
+// motor pins
+sbit motorpin1 = P3 ^ 6;
+sbit motorpin2 = P3 ^ 7;
+char keypad();
+void check();
+void delay(unsigned int);
+unsigned char pin[] = {"12345"};
+unsigned char Epin[5];
+void delay1(int val)
+{
+int i,j,k;
+for(i=0;i<=val;i++)
+{
+for(j=0;j<=0x55;j++)
+{
+for(k=0;k<=0x55;k++)
+{
+}
+}
+}
+}
+void main()
+   {
+			motorpin1 = 1;
+	   	lcd_init();
+		  lcd_com(0x0e);
+		  lcd_com(0x01);
+		  lcd_com(0x80);
+		  lcd_puts("ENTER PIN NUMBER");
+		  lcd_com(0xc0);
+		  lcd_puts("                 ");
+		  delay1(1);
+		  while (1)
+    {
+        unsigned int i = 0;
+        lcd_com(0x80);
+				lcd_puts("ENTER PIN NUMBER");
+        delay1(1);
+        lcd_com(0xc0); //decimal value: 192
+        while (pin[i] != '\0')
+        {
+            Epin[i] = keypad();
+            delay1(1);
+            i++;
+        }
+        check();
+    }
+}
+	 char keypad()
+{
+    int x = 0;
+    while (x == 0)
+    {
+        // assign values for first row
+        keyrow1 = 0;
+        keyrow2 = 1;
+        keyrow3 = 1;
+        keyrow4 = 1;
+        if (keycolumn1 == 0)
+        {
+            lcd_data('1');
+            delay1(1);
+            x = 1;
+            return '1';
+        }
+        if (keycolumn2 == 0)
+        {
+            lcd_data('2');
+            delay1(1);
+            x = 1;
+            return '2';
+        }
+        if (keycolumn3 == 0)
+        {
+            lcd_data('3');
+            delay1(1);
+            x = 1;
+            return '3';
+        }
+        // assign values for second row
+        keyrow1 = 1;
+        keyrow2 = 0;
+        keyrow3 = 1;
+        keyrow4 = 1;
+
+        if (keycolumn1 == 0)
+        {
+            lcd_data('4');
+            delay1(1);
+            x = 1;
+            return '4';
+        }
+        if (keycolumn2 == 0)
+        {
+            lcd_data('5');
+            delay1(1);
+            x = 1;
+            return '5';
+        }
+        if (keycolumn3 == 0)
+        {
+            lcd_data('6');
+            delay1(1);
+            x = 1;
+            return '6';
+        }
+
+        // assign values for third row
+        keyrow1 = 1;
+        keyrow2 = 1;
+        keyrow3 = 0;
+        keyrow4 = 1;
+        if (keycolumn1 == 0)
+        {
+            lcd_data('7');
+            delay1(1);
+            x = 1;
+            return '7';
+        }
+        if (keycolumn2 == 0)
+        {
+            lcd_data('8');
+            delay1(1);
+            x = 1;
+            return '8';
+        }
+        if (keycolumn3 == 0)
+        {
+            lcd_data('9');
+            delay1(1);
+            x = 1;
+            return '9';
+        }
+
+        // assign values for forth row
+        keyrow1 = 1;
+        keyrow2 = 1;
+        keyrow3 = 1;
+        keyrow4 = 0;
+
+        if (keycolumn1 == 0)
+        {
+            lcd_data('*');
+            delay1(1);
+            x = 1;
+            return '*';
+        }
+        if (keycolumn2 == 0)
+        {
+            lcd_data('0');
+            delay1(1);
+            x = 1;
+            return '0';
+        }
+        if (keycolumn3 == 0)
+        {
+            lcd_data('#');
+            delay1(1);
+            x = 1;
+            return '#';
+        }
+    }
+}
+
+// password check function and run the door motor
+
+void check()
+{
+    //  compare the input value with the assign password value
+    if (pin[0] == Epin[0] && pin[1] == Epin[1] && pin[2] == Epin[2] && pin[3] == Epin[3] && pin[4] == Epin[4])
+    {
+        delay1(1);
+        lcd_com(0x01); //decimal value: 1
+        lcd_com(0x81); //decimal value: 129
+        // show pin is correct
+        lcd_puts("PIN CORRECT");
+        delay1(10);
+        // door motor will run
+        motorpin1 = 0;
+        motorpin2 = 0;
+        lcd_com(0xc1); //decimal value: 193
+        // show the door is unlocked
+        lcd_puts("DOOR OPENED");
+        delay1(20);
+        motorpin1 = 1;
+        motorpin2 = 0;
+        lcd_com(0x01); //decimal value: 1
+    }
+    else
+    {
+        lcd_com(0x01); //decimal value: 1
+        lcd_com(0x80); //decimal value: 128
+        lcd_puts("WRONG PIN");
+        delay1(10);
+        lcd_com(0x01); //decimal value: 1
+    }
+}
+
+// end
